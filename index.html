@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifa Online</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            max-width: 400px;
+            margin: auto;
+        }
+        .num {
+            padding: 10px;
+            border: 1px solid #000;
+            cursor: pointer;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+        .num.reservado {
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Escolha um Número da Rifa</h2>
+    <p>Clique em um número e insira o nome do participante.</p>
+
+    <div class="grid" id="numeros"></div>
+
+    <h3>Lista de Participantes</h3>
+    <ul id="listaParticipantes"></ul>
+
+    <script>
+        const numerosContainer = document.getElementById("numeros");
+        const listaParticipantes = document.getElementById("listaParticipantes");
+        let participantes = {};
+
+        function atualizarLista() {
+            listaParticipantes.innerHTML = "";
+            Object.entries(participantes).forEach(([num, nome]) => {
+                let li = document.createElement("li");
+                li.textContent = `Número ${num}: ${nome}`;
+                listaParticipantes.appendChild(li);
+            });
+        }
+
+        function selecionarNumero(numElemento, numero) {
+            if (numElemento.classList.contains("reservado")) {
+                alert("Número já escolhido!");
+                return;
+            }
+
+            let nome = prompt("Digite o nome do participante:");
+            if (nome) {
+                participantes[numero] = nome;
+                numElemento.classList.add("reservado");
+                numElemento.textContent = numero + " ✅";
+                atualizarLista();
+            }
+        }
+
+        function criarNumeros() {
+            for (let i = 1; i <= 100; i++) {
+                let div = document.createElement("div");
+                div.className = "num";
+                div.textContent = i;
+                div.onclick = () => selecionarNumero(div, i);
+                numerosContainer.appendChild(div);
+            }
+        }
+
+        criarNumeros();
+    </script>
+
+</body>
+</html>
