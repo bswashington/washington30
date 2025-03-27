@@ -38,6 +38,9 @@
         .button:hover {
             background-color: #c94426;
         }
+        .lista-destacada {
+            background-color: yellow;
+        }
     </style>
 </head>
 <body>
@@ -64,6 +67,10 @@
             Object.entries(participantes).forEach(([num, nome]) => {
                 let li = document.createElement("li");
                 li.textContent = `Número ${num}: ${nome}`;
+                // Adiciona classe de destaque se o número estiver reservado
+                if (participantes[num]) {
+                    li.classList.add("lista-destacada");
+                }
                 listaParticipantes.appendChild(li);
             });
         }
@@ -72,55 +79,4 @@
         function selecionarNumero(numElemento, numero) {
             if (numElemento.classList.contains("reservado")) {
                 if (confirm(`Deseja remover o participante do número ${numero}?`)) {
-                    delete participantes[numero];  // Remove da lista
-                    numElemento.classList.remove("reservado");
-                    numElemento.textContent = numero;
-                    localStorage.setItem('participantes', JSON.stringify(participantes));
-                    atualizarLista();
-                }
-                return;
-            }
-
-            let nome = prompt("Digite o nome do participante:");
-            if (nome) {
-                participantes[numero] = nome;
-                numElemento.classList.add("reservado");
-                numElemento.textContent = numero + " ✅";
-                localStorage.setItem('participantes', JSON.stringify(participantes));
-                atualizarLista();
-            }
-        }
-
-        // Função para resetar a lista com senha
-        function resetarLista() {
-            const senha = document.getElementById('senha').value;
-            if (senha === '8888') {
-                if (confirm("Tem certeza que deseja resetar a lista de participantes?")) {
-                    localStorage.removeItem('participantes');
-                    participantes = {};
-                    atualizarLista();
-                    alert("Lista resetada!");
-                }
-            } else {
-                alert("Senha incorreta!");
-            }
-        }
-
-        // Função para criar os números da rifa
-        function criarNumeros() {
-            for (let i = 1; i <= 100; i++) {
-                let div = document.createElement("div");
-                div.className = "num";
-                div.textContent = i;
-                div.onclick = () => selecionarNumero(div, i);
-                numerosContainer.appendChild(div);
-            }
-        }
-
-        // Inicializa a página com números e a lista de participantes
-        criarNumeros();
-        atualizarLista();
-    </script>
-
-</body>
-</html>
+                    delete participantes[numero];
