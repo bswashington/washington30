@@ -79,4 +79,17 @@
         function selecionarNumero(numElemento, numero) {
             if (numElemento.classList.contains("reservado")) {
                 if (confirm(`Deseja remover o participante do número ${numero}?`)) {
-                    delete participantes[numero];
+                    delete participantes[numero];  // Remove da lista
+                    numElemento.classList.remove("reservado");
+                    numElemento.textContent = numero;
+                    localStorage.setItem('participantes', JSON.stringify(participantes));
+                    atualizarLista();
+                }
+                return;
+            }
+
+            let nome = prompt("Digite o nome do participante:");
+            if (nome) {
+                participantes[numero] = nome;
+                numElemento.classList.add("reservado");
+                numElemento.textContent = numero + " ✅";
