@@ -42,42 +42,25 @@
             background-color: yellow;
         }
     </style>
-    <!-- Adicionando o link para a biblioteca SheetJS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body>
 
     <h2>Escolha um Número da Rifa</h2>
     <p>Clique em um número e insira o nome do participante. Para desfazer, clique novamente.</p>
 
-    <!-- Container para os números da rifa -->
     <div class="grid" id="numeros"></div>
 
     <h3>Lista de Participantes</h3>
     <ul id="listaParticipantes"></ul>
 
-    <!-- Campo de senha e botão de reset -->
     <input type="password" id="senha" placeholder="Digite a senha para resetar" />
     <button class="button" onclick="resetarLista()">Resetar Lista</button>
-
-    <!-- Botão para baixar a lista de participantes em Excel -->
-    <button class="button" onclick="baixarExcel()">Baixar Lista em Excel</button>
+    <button class="button" onclick="baixarLista()">Baixar Lista em Excel</button>
 
     <script>
         const numerosContainer = document.getElementById("numeros");
         const listaParticipantes = document.getElementById("listaParticipantes");
         let participantes = JSON.parse(localStorage.getItem('participantes')) || {};
-
-        // Função para criar os números de 1 a 100
-        function criarNumeros() {
-            for (let i = 1; i <= 100; i++) {
-                let div = document.createElement("div");
-                div.className = "num";
-                div.textContent = i;
-                div.onclick = () => selecionarNumero(div, i);
-                numerosContainer.appendChild(div);
-            }
-        }
 
         // Função para atualizar a lista de participantes
         function atualizarLista() {
@@ -85,7 +68,6 @@
             Object.entries(participantes).forEach(([num, nome]) => {
                 let li = document.createElement("li");
                 li.textContent = `Número ${num}: ${nome}`;
-                // Adiciona classe de destaque se o número estiver reservado
                 if (participantes[num]) {
                     li.classList.add("lista-destacada");
                 }
@@ -97,52 +79,70 @@
         function selecionarNumero(numElemento, numero) {
             if (numElemento.classList.contains("reservado")) {
                 if (confirm(`Deseja remover o participante do número ${numero}?`)) {
-                    delete participantes[numero];  // Remove da lista
+                    delete participantes[numero];
                     numElemento.classList.remove("reservado");
-                    numElemento.textContent = numero;
-                    localStorage.setItem('participantes', JSON.stringify(participantes));
                     atualizarLista();
+                    localStorage.setItem('participantes', JSON.stringify(participantes));
                 }
-                return;
-            }
-
-            let nome = prompt("Digite o nome do participante:");
-            if (nome) {
-                participantes[numero] = nome;
-                numElemento.classList.add("reservado");
-                numElemento.textContent = numero + " ✅";
-                localStorage.setItem('participantes', JSON.stringify(participantes));
-                atualizarLista();
+            } else {
+                let nome = prompt("Digite o nome do participante:");
+                if (nome) {
+                    participantes[numero] = nome;
+                    numElemento.classList.add("reservado");
+                    atualizarLista();
+                    localStorage.setItem('participantes', JSON.stringify(participantes));
+                }
             }
         }
 
-        // Função para resetar a lista com senha
-        function resetarLista() {
-            const senha = document.getElementById('senha').value;
-            if (senha === '8888') {
-                if (confirm("Tem certeza que deseja resetar a lista de participantes?")) {
-                    localStorage.removeItem('participantes');
-                    participantes = {};
-                    atualizarLista();
-                    alert("Lista resetada!");
+        // Função para criar os números na grid
+        function criarNumeros() {
+            for (let i = 1; i <= 100; i++) {
+                let div = document.createElement("div");
+                div.className = "num";
+                div.textContent = i;
+                div.onclick = () => selecionarNumero(div, i);
+                if (participantes[i]) {
+                    div.classList.add("reservado");
                 }
+                numerosContainer.appendChild(div);
+            }
+        }
+
+        // Função para resetar a lista de participantes
+        function resetarLista() {
+            let senha = document.getElementById("senha").value;
+            if (senha === "8888") {
+                participantes = {};
+                localStorage.setItem('participantes', JSON.stringify(participantes));
+                criarNumeros();
+                atualizarLista();
+                alert("Lista resetada com sucesso!");
             } else {
                 alert("Senha incorreta!");
             }
         }
 
-        // Função para baixar a lista em formato Excel
-        function baixarExcel() {
-            const participantesArray = Object.entries(participantes).map(([numero, nome]) => [numero, nome]);
-            const ws = XLSX.utils.aoa_to_sheet([['Número', 'Participante'], ...participantesArray]);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Participantes');
-            XLSX.writeFile(wb, 'lista_participantes_rifa.xlsx');
+        // Função para baixar a lista de participantes em Excel
+        function baixarLista() {
+            let tabela = "<table border='1'><tr><th>Número</th><th>Nome</th></tr>";
+            Object.entries(participantes).forEach(([num, nome]) => {
+                tabela += `<tr><td>${num}</td><td>${nome}</td></tr>`;
+            });
+            tabela += "</table>";
+
+            let uri = "data:application/vnd.ms-excel;base64,";
+            let base64 = btoa(unescape(encodeURIComponent(tabela)));
+            let link = document.createElement('a');
+            link.href = uri + base64;
+            link.download = "lista_participantes.xls";
+            link.click();
         }
 
-        // Inicializa a página com números e a lista de participantes
+        // Chama a função para criar os números na grid
         criarNumeros();
         atualizarLista();
+
     </script>
 
 </body>
